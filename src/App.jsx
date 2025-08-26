@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CreateButton from "./components/Create-new-button";
 import SearchBar from "./components/Search-bar";
 import FileMenu from "./components/FileMenu";
 import NoteCard from "./components/NoteCard";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Quill theme
 
 const App = () => {
   const [notes, setNotes] = useState(() => {
@@ -38,6 +40,8 @@ const App = () => {
     setSelectedNoteId(id);
     setNoteContent(note.content || "");
   };
+  // Open note
+  const fileInputRef = React.useRef(null);
 
   // Save content
   const handleSaveNote = () => {
@@ -94,7 +98,7 @@ const App = () => {
         handleCreateNewNote();
         break;
       case "open":
-        // handle Open logic
+        fileInputRef.current.click();
         break;
       case "save":
         handleSaveNote();
@@ -161,6 +165,32 @@ const App = () => {
           </div>
         </div>
       </div>
+      <input
+        type="file"
+        accept=".txt"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              const content = event.target.result;
+              const timestamp = new Date().toLocaleString();
+              const newNote = {
+                id: Date.now(),
+                title: file.name,
+                timestamp,
+                content,
+              };
+              setNotes((prevNotes) => [...prevNotes, newNote]);
+              setSelectedNoteId(newNote.id);
+              setNoteContent(content);
+            };
+            reader.readAsText(file);
+          }
+        }}
+      />
     </>
   );
 };
