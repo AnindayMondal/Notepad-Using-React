@@ -1,17 +1,24 @@
 import { useState, useEffect, useRef } from "react";
+import config from "../config";
 
 const useNotes = () => {
   const [notes, setNotes] = useState(() => {
-    const savedNotes = localStorage.getItem("notepad-notes");
+    const savedNotes = localStorage.getItem(config.localStorageKey);
     return savedNotes ? JSON.parse(savedNotes) : [];
   });
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [noteContent, setNoteContent] = useState("");
+  const [filteredNotes, setFilteredNotes] = useState(notes);
   const fileInputRef = useRef(null);
 
   // Sync with localStorage
   useEffect(() => {
-    localStorage.setItem("notepad-notes", JSON.stringify(notes));
+    localStorage.setItem(config.localStorageKey, JSON.stringify(notes));
+  }, [notes]);
+
+  // Sync filteredNotes with notes
+  useEffect(() => {
+    setFilteredNotes(notes);
   }, [notes]);
 
   // Create note
@@ -90,7 +97,7 @@ const useNotes = () => {
         const timestamp = new Date().toLocaleString();
         const newNote = {
           id: Date.now(),
-          title: file.name,
+          title: file.name.replace(/\.txt$|\.md$/, ""), // Remove .txt or .md extension
           timestamp,
           content,
         };
@@ -100,6 +107,48 @@ const useNotes = () => {
       };
       reader.readAsText(file);
     }
+  };
+
+  // Save As (download note as .md file)
+  const handleSaveAs = () => {
+    if (selectedNoteId === null) {
+      alert("No note selected!");
+      return;
+    }
+    const note = notes.find((n) => n.id === selectedNoteId);
+    if (!note) {
+      alert("Selected note not found!");
+      return;
+    }
+    // Sanitize title to create a valid file name
+    const sanitizedTitle = note.title
+      .replace(/[^a-zA-Z0-9\s-]/g, "") // Remove special characters
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .trim() || "untitled-note"; // Fallback if title is empty
+    const blob = new Blob([noteContent], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sanitizedTitle}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert("Note downloaded as Markdown!");
+  };
+
+  // Search notes
+  const handleSearch = (query) => {
+    if (!query) {
+      setFilteredNotes(notes);
+      return;
+    }
+    const lowerQuery = query.toLowerCase();
+    setFilteredNotes(
+      notes.filter(
+        (note) =>
+          note.title.toLowerCase().includes(lowerQuery) ||
+          note.content.toLowerCase().includes(lowerQuery)
+      )
+    );
   };
 
   // File action handler
@@ -115,8 +164,7 @@ const useNotes = () => {
         handleSaveNote();
         break;
       case "saveAs":
-        // Placeholder for saveAs logic
-        alert("Save As not implemented");
+        handleSaveAs();
         break;
       case "print":
         handlePrint();
@@ -127,7 +175,7 @@ const useNotes = () => {
   };
 
   return {
-    notes,
+    notes: filteredNotes,
     selectedNoteId,
     noteContent,
     setNoteContent,
@@ -136,6 +184,7 @@ const useNotes = () => {
     handleSelectNote,
     handleDeleteNote,
     handleOpenFile,
+    handleSearch,
   };
 };
 
