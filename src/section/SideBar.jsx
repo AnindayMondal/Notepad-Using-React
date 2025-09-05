@@ -2,7 +2,7 @@ import CreateButton from "../components/Create-new-button";
 import SearchBar from "../components/Search-bar";
 import NoteCard from "../components/NoteCard";
 
-const Sidebar = ({ notes, selectedNoteId, handleFileAction, handleSelectNote, handleDeleteNote, handleSearch }) => {
+const Sidebar = ({ notes, selectedNoteId, handleFileAction, handleSelectNote, handleDeleteNote, handleSearch, handleUpdateTitle }) => {
   return (
     <div className="col-span-1 overflow-y-auto border-r border-solid">
       <CreateButton onCreate={handleFileAction.bind(null, "new")} />
@@ -20,6 +20,7 @@ const Sidebar = ({ notes, selectedNoteId, handleFileAction, handleSelectNote, ha
               timestamp={note.timestamp}
               onClick={() => handleSelectNote(note.id)}
               onDelete={() => handleDeleteNote(note.id)}
+              onUpdateTitle={(newTitle) => handleUpdateTitle(note.id, newTitle)}
             />
           </div>
         ))}

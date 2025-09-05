@@ -16,11 +16,14 @@ const Notepad = () => {
     handleDeleteNote,
     handleOpenFile,
     handleSearch,
+    handleUpdateTitle,
   } = useNotes();
 
   return (
-    <div className=" bg-cover bg-center bg-no-repeat"
-    style={{ backgroundImage: `url(${backgroundImage})` }}>
+    <div
+      className="bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${backgroundImage})` }}
+    >
       <div className="w-[95%] mx-auto max-w-[1140px]">
         <Header />
         <div className="grid grid-cols-5 h-screen">
@@ -31,6 +34,7 @@ const Notepad = () => {
             handleSelectNote={handleSelectNote}
             handleDeleteNote={handleDeleteNote}
             handleSearch={handleSearch}
+            handleUpdateTitle={handleUpdateTitle}
           />
           <Editor
             noteContent={noteContent}
@@ -50,4 +54,4 @@ const Notepad = () => {
   );
 };
 
-export default Notepad
+export default Notepad;

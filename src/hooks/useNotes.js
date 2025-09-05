@@ -6,7 +6,10 @@ const useNotes = () => {
     const savedNotes = localStorage.getItem(config.localStorageKey);
     return savedNotes ? JSON.parse(savedNotes) : [];
   });
-  const [selectedNoteId, setSelectedNoteId] = useState(null);
+  const [selectedNoteId, setSelectedNoteId] = useState(() => {
+    const savedSelectedId = localStorage.getItem("selectedNoteId");
+    return savedSelectedId ? parseInt(savedSelectedId) : null;
+  });
   const [noteContent, setNoteContent] = useState("");
   const [filteredNotes, setFilteredNotes] = useState(notes);
   const fileInputRef = useRef(null);
@@ -14,19 +17,30 @@ const useNotes = () => {
   // Sync with localStorage
   useEffect(() => {
     localStorage.setItem(config.localStorageKey, JSON.stringify(notes));
-  }, [notes]);
+    if (selectedNoteId !== null) {
+      localStorage.setItem("selectedNoteId", selectedNoteId.toString());
+    }
+  }, [notes, selectedNoteId]);
 
-  // Sync filteredNotes with notes
+  // Sync filteredNotes with notes and load selected note content
   useEffect(() => {
     setFilteredNotes(notes);
-  }, [notes]);
+    if (selectedNoteId !== null) {
+      const note = notes.find((n) => n.id === selectedNoteId);
+      setNoteContent(note?.content || "");
+    } else if (notes.length > 0) {
+      setSelectedNoteId(notes[0].id); // Default to first note if no saved ID
+      setNoteContent(notes[0].content || "");
+    }
+  }, [notes, selectedNoteId]);
 
-  // Create note
+  // Create note with custom title
   const handleCreateNewNote = () => {
+    const title = prompt("Enter the title for the new note:", `Untitled Note ${notes.length + 1}`);
     const timestamp = new Date().toLocaleString();
     const newNote = {
       id: Date.now(),
-      title: `Untitled Note ${notes.length + 1}`,
+      title: title || `Untitled Note ${notes.length + 1}`,
       timestamp,
       content: "",
     };
@@ -38,8 +52,10 @@ const useNotes = () => {
   // Select note
   const handleSelectNote = (id) => {
     const note = notes.find((n) => n.id === id);
-    setSelectedNoteId(id);
-    setNoteContent(note?.content || "");
+    if (note) {
+      setSelectedNoteId(id);
+      setNoteContent(note.content || "");
+    }
   };
 
   // Save note
@@ -65,6 +81,14 @@ const useNotes = () => {
     }
   };
 
+  // Update note title
+  const handleUpdateTitle = (id, newTitle) => {
+    const updatedNotes = notes.map((note) =>
+      note.id === id ? { ...note, title: newTitle } : note
+    );
+    setNotes(updatedNotes);
+  };
+
   // Print note
   const handlePrint = () => {
     const printWindow = window.open("", "_blank", "width=600,height=600");
@@ -77,7 +101,7 @@ const useNotes = () => {
           </style>
         </head>
         <body>
-          ${noteContent.replace(/\n/g, "<br/>")}
+          ${noteContent.replace(/<[^>]+>/g, '')} <!-- Strip HTML for plain text printing -->
         </body>
       </html>
     `);
@@ -97,7 +121,7 @@ const useNotes = () => {
         const timestamp = new Date().toLocaleString();
         const newNote = {
           id: Date.now(),
-          title: file.name.replace(/\.txt$|\.md$/, ""), // Remove .txt or .md extension
+          title: file.name.replace(/\.txt$|\.md$/, ""),
           timestamp,
           content,
         };
@@ -120,11 +144,10 @@ const useNotes = () => {
       alert("Selected note not found!");
       return;
     }
-    // Sanitize title to create a valid file name
     const sanitizedTitle = note.title
-      .replace(/[^a-zA-Z0-9\s-]/g, "") // Remove special characters
-      .replace(/\s+/g, "-") // Replace spaces with hyphens
-      .trim() || "untitled-note"; // Fallback if title is empty
+      .replace(/[^a-zA-Z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .trim() || "untitled-note";
     const blob = new Blob([noteContent], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -185,6 +208,7 @@ const useNotes = () => {
     handleDeleteNote,
     handleOpenFile,
     handleSearch,
+    handleUpdateTitle,
   };
 };
 
