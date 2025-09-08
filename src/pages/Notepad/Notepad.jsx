@@ -3,6 +3,7 @@ import Sidebar from "../../section/SideBar";
 import Editor from "../../section/Editor";
 import useNotes from "../../hooks/useNotes";
 import backgroundImage from "../../assets/images/backgound.png";
+import { useEffect } from "react";
 
 const Notepad = () => {
   const {
@@ -18,6 +19,34 @@ const Notepad = () => {
     handleSearch,
     handleUpdateTitle,
   } = useNotes();
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey) {
+        switch (event.key) {
+          case "n":
+            event.preventDefault(); // Prevent new tab
+            handleFileAction("new");
+            break;
+          case "q":
+            event.preventDefault();
+            if (selectedNoteId !== null) {
+              handleDeleteNote(selectedNoteId);
+            }
+            break;
+          case "s":
+            event.preventDefault();
+            handleFileAction("save");
+            break;
+          default:
+            break;
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown); // Cleanup
+  }, [handleFileAction, handleDeleteNote, selectedNoteId]);
 
   return (
     <div
