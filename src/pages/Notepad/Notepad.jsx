@@ -25,7 +25,7 @@ const Notepad = () => {
       if (event.ctrlKey) {
         switch (event.key) {
           case "n":
-            event.preventDefault(); // Prevent new tab
+            event.preventDefault();
             handleFileAction("new");
             break;
           case "q":
