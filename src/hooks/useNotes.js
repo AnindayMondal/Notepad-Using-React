@@ -14,7 +14,6 @@ const useNotes = () => {
   const [filteredNotes, setFilteredNotes] = useState(notes);
   const fileInputRef = useRef(null);
 
-  // Sync with localStorage
   useEffect(() => {
     localStorage.setItem(config.localStorageKey, JSON.stringify(notes));
     if (selectedNoteId !== null) {
@@ -22,19 +21,17 @@ const useNotes = () => {
     }
   }, [notes, selectedNoteId]);
 
-  // Sync filteredNotes with notes and load selected note content
   useEffect(() => {
     setFilteredNotes(notes);
     if (selectedNoteId !== null) {
       const note = notes.find((n) => n.id === selectedNoteId);
       setNoteContent(note?.content || "");
     } else if (notes.length > 0) {
-      setSelectedNoteId(notes[0].id); // Default to first note if no saved ID
+      setSelectedNoteId(notes[0].id);
       setNoteContent(notes[0].content || "");
     }
   }, [notes, selectedNoteId]);
 
-  // Create note with custom title
   const handleCreateNewNote = () => {
     const title = prompt("Enter the title for the new note:", `Untitled Note ${notes.length + 1}`);
     const timestamp = new Date().toLocaleString();
@@ -49,7 +46,6 @@ const useNotes = () => {
     setNoteContent("");
   };
 
-  // Select note
   const handleSelectNote = (id) => {
     const note = notes.find((n) => n.id === id);
     if (note) {
@@ -58,7 +54,6 @@ const useNotes = () => {
     }
   };
 
-  // Save note
   const handleSaveNote = () => {
     if (selectedNoteId === null) {
       alert("No note selected!");
@@ -71,7 +66,6 @@ const useNotes = () => {
     alert("Note saved!");
   };
 
-  // Delete note
   const handleDeleteNote = (idToDelete) => {
     const updatedNotes = notes.filter((note) => note.id !== idToDelete);
     setNotes(updatedNotes);
@@ -81,7 +75,6 @@ const useNotes = () => {
     }
   };
 
-  // Update note title
   const handleUpdateTitle = (id, newTitle) => {
     const updatedNotes = notes.map((note) =>
       note.id === id ? { ...note, title: newTitle } : note
@@ -89,7 +82,6 @@ const useNotes = () => {
     setNotes(updatedNotes);
   };
 
-  // Print note
   const handlePrint = () => {
     const printWindow = window.open("", "_blank", "width=600,height=600");
     printWindow.document.write(`
@@ -111,7 +103,6 @@ const useNotes = () => {
     printWindow.close();
   };
 
-  // Open file
   const handleOpenFile = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -133,7 +124,6 @@ const useNotes = () => {
     }
   };
 
-  // Save As (download note as .md file)
   const handleSaveAs = () => {
     if (selectedNoteId === null) {
       alert("No note selected!");
@@ -158,7 +148,6 @@ const useNotes = () => {
     alert("Note downloaded as Markdown!");
   };
 
-  // Search notes
   const handleSearch = (query) => {
     if (!query) {
       setFilteredNotes(notes);
@@ -174,7 +163,6 @@ const useNotes = () => {
     );
   };
 
-  // File action handler
   const handleFileAction = (action) => {
     switch (action) {
       case "new":
