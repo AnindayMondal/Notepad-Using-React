@@ -2,7 +2,7 @@ import Header from "../../section/Header";
 import Sidebar from "../../section/SideBar";
 import Editor from "../../section/Editor";
 import useNotes from "../../hooks/useNotes";
-import backgroundImage from "../../assets/images/backgound.png";
+import backgroundImage from "../../assets/images/photo1.jpg";
 import { useEffect } from "react";
 
 const Notepad = () => {

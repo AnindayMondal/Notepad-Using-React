@@ -33,7 +33,7 @@ useEffect(() => {
         <FileMenu onAction={handleFileAction} />
       </div>
       <div className="relative">
-        <EditorContent editor={editor} className="min-h-[400px] w-full p-4 bg-transparent" />
+        <EditorContent editor={editor} className="min-h-[400px] w-full p-4 backdrop-brightness-90"/>
       </div>
     </div>
   );
